@@ -11,13 +11,46 @@
 // take a look at solversSpec.js to see what the tests are expecting
 
 
-// return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such
-//that none of them can attack each other
+// return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
 
 
 window.findNRooksSolution = function(n) {
-  var solution = undefined; //fixme
+  //declare solution variable that stores viable rook combination
+  var solution; //fixme
+  var boardObj = new Board({n: n});
+  var board = boardObj.rows();
+
+
+  //recursive function goes here
+  var findSolution = function ( board, rooksLeft, rowIndex) {
+
+    if ( rooksLeft === 0 ) {
+      return board;
+    }
+
+    //loop through the rows
+      //loop through columns
+      var row = rowIndex;
+      for ( var col = 0; col < board[row].length; col++ ) {
+        //toggle rook at each coordinate
+        boardObj.togglePiece(row, col);
+        // check for conflicts, both rows and columns
+        //if conflicts
+        if ( boardObj.hasAnyRooksConflicts() ) {
+          //untoggle action
+          boardObj.togglePiece(row, col);
+          // if no conflicts,
+        } else {
+          // recurse passing in modified board, rooksleft-1
+          return findSolution( board, rooksLeft - 1, rowIndex + 1);
+        }
+      }
+
+  };
+
+  //instantiate with a single rook in the rop left
+  solution = findSolution( board, n, 0);
 
   console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
   return solution;
