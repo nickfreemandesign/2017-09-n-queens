@@ -99,54 +99,58 @@ window.countNRooksSolutions = function(n) {
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-    if (n === 2){
-      var boardObj = new Board({n: n})
-      return boardObj.rows();
-    }
-    if (n === 3){
-      var boardObj = new Board({n: n})
-      return boardObj.rows();
-    }
-    //declare one board object, passing in n for size
+  //return empty board if n is 2 or 3 because there is
+  //no solution for these edge cases
+  if (n === 2 || n === 3) {
     var boardObj = new Board({n: n});
-    //declare board, calling rows() on board object
-    var board = boardObj.rows();
+    return boardObj.rows();
+  }
+  //declare one board object, passing in n for size
+  var boardObj = new Board({n: n});
+  //declare board, calling rows() on board object
+  var board = boardObj.rows();
 
 
-    //inner recursive function goes here
-    var findSolution = function ( board, rowIndex) {
+  //inner recursive function that moves through the board
+  var findSolution = function ( board, rowIndex) {
 
-      //if n rooks have been placed
-      if ( rowIndex === n ) {
-        return board
-      } else {
-      //loop through columns
-        var row = rowIndex;
-        for ( var col = 0; col < board[row].length; col++ ) {
-          //toggle queen
+  //base case to exit when the row outside the bounds of
+  //the chessboard
+    if ( rowIndex === n ) {
+  //return the board back to result
+      return board;
+    } else {
+      var row = rowIndex; //set as row for readability
+      //loop through columns, with first call starting at first row
+      for ( var col = 0; col < board[row].length; col++ ) {
+        //toggle queen
+        boardObj.togglePiece(row, col);
+        //check if there are any conflicts from the newly toggled queen
+        if ( boardObj.hasAnyQueensConflicts() ) {
+          //if conflict is true, untoggle
           boardObj.togglePiece(row, col);
-          //if there is a conflict on board
-          if ( boardObj.hasAnyQueensConflicts() ) {
-
-            boardObj.togglePiece(row, col);
-          } else {
-            var result;
-
-            result = findSolution( board, rowIndex + 1);
-            if (result) {
-              return result
-            }
-            boardObj.togglePiece(row, col);
+        } else {
+          //if no conflict, pass modified board to recursive loop, starting
+          //at next row
+          var result = findSolution( board, rowIndex + 1);
+          //once recursive loop hits base case and returns board,
+          //result will be truthy
+          if (result) {
+            //return result back to solution
+            return result;
           }
+          //untoggle board
+          boardObj.togglePiece(row, col);
         }
       }
-    };
+    }
+  };
+  //initialize recursive loop, starting with an empty board, at the top rowIndex
+  //store the result in solution
+  var solution = findSolution(board, 0);
+  console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
 
-    //instantiate recursive loop
-    var solution = findSolution( board, 0);
-    console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
-
-    return solution;
+  return solution;
 
 };
 
