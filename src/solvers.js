@@ -16,8 +16,7 @@
 
 
 window.findNRooksSolution = function(n) {
-  //declare solution variable that stores viable rook combination
-  var solution; //fixme
+  var solution; //declared to store and return solution
   var boardObj = new Board({n: n});
   var board = boardObj.rows();
 
@@ -25,31 +24,29 @@ window.findNRooksSolution = function(n) {
   //recursive function goes here
   var findSolution = function ( board, rooksLeft, rowIndex) {
 
+    //rowIndex allows us to jump to next row when viable rook is found
+
     if ( rooksLeft === 0 ) {
+      //if there are no rows left, solution is returned
       return board;
     }
 
-    //loop through the rows
-      //loop through columns
-      var row = rowIndex;
-      for ( var col = 0; col < board[row].length; col++ ) {
-        //toggle rook at each coordinate
-        boardObj.togglePiece(row, col);
-        // check for conflicts, both rows and columns
-        //if conflicts
-        if ( boardObj.hasAnyRooksConflicts() ) {
-          //untoggle action
-          boardObj.togglePiece(row, col);
-          // if no conflicts,
-        } else {
-          // recurse passing in modified board, rooksleft-1
-          return findSolution( board, rooksLeft - 1, rowIndex + 1);
-        }
-      }
+    var row = rowIndex; //for readability
 
+    for ( var col = 0; col < board[row].length; col++ ) {
+
+      boardObj.togglePiece(row, col); //toggle each coordinate of current row
+      if ( boardObj.hasAnyRooksConflicts() ) {
+        boardObj.togglePiece(row, col); // untoggle in event of conflict
+      } else {
+        // if viable rook is found, recursively start on next row
+        return findSolution( board, rooksLeft - 1, rowIndex + 1);
+        // togglePiece(row,col)
+      }
+    }
   };
 
-  //instantiate with a single rook in the rop left
+  //call find solution on the first row, index 0
   solution = findSolution( board, n, 0);
 
   console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
@@ -58,7 +55,47 @@ window.findNRooksSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
 window.countNRooksSolutions = function(n) {
-  var solutionCount = undefined; //fixme
+
+  //declare solutionCount, default assignment is 0
+  var solutionCount = 0;
+  //declare one board object, passing in n for size
+  var boardObj = new Board({n: n});
+  //declare board, calling rows() on board object
+  var board = boardObj.rows();
+
+
+  //inner recursive function goes here
+  var findSolution = function ( board, rooksLeft, rowIndex) {
+    //if n rooks have been placed
+    if ( rooksLeft === 0 ) {
+      //add 1 to solutionCount
+      solutionCount++;
+    } else {
+    //loop through columns
+      var row = rowIndex;
+      for ( var col = 0; col < board[row].length; col++ ) {
+        //toggle rook
+        boardObj.togglePiece(row, col);
+        //if there is a conflict on board
+        if ( boardObj.hasAnyRooksConflicts() ) {
+            //remove rook
+          boardObj.togglePiece(row, col);
+        } else {
+          //head down recursive path with that toggled piece
+          findSolution( board, rooksLeft - 1, rowIndex + 1);
+          //untoggle that piece and continue for loop
+          boardObj.togglePiece(row, col);
+        }
+      }
+    }
+  };
+
+
+  //instantiate recursive loop
+  findSolution( board, n, 0);
+
+
+
 
   console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
   return solutionCount;
